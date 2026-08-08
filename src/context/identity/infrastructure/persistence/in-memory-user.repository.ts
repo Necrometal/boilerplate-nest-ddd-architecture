@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../../domain/ports/user.repository';
 import { Email } from '../../domain/user/email.vo';
