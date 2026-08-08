@@ -21,4 +21,14 @@ export abstract class AggregateRoot<
   protected addDomainEvent(event: DomainEvent): void {
     this.#domainEvents.push(event);
   }
+
+  // Public: the application layer calls this after persisting the aggregate,
+  // to fetch events for publishing (e.g. to an event bus). Returns a copy and
+  // clears the internal buffer in the same call, so the same event can never
+  // be pulled and published twice from one aggregate instance.
+  pullDomainEvents(): DomainEvent[] {
+    const events = [...this.#domainEvents];
+    this.#domainEvents = [];
+    return events;
+  }
 }
