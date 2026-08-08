@@ -1,4 +1,4 @@
-import { DomainEvent } from './domain_event';
+import { DomainEvent } from './domain-event';
 import { Entity } from './entity';
 import { Identifier } from './identifier';
 

@@ -1,5 +1,5 @@
 import { v7 as randomUUID } from 'uuid';
-import { ValueObject } from './value_object';
+import { ValueObject } from './value-object';
 
 // Wraps a raw string id in a value object so entities compare/pass identity
 // through a type ("Identifier"), never a bare, mistake-prone string.
