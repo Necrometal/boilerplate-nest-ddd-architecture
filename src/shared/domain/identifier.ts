@@ -12,6 +12,12 @@ export class Identifier extends ValueObject<{ value: string }> {
 
   // v7 (time-ordered UUID) instead of v4: sorts roughly by creation time,
   // which keeps DB index inserts sequential instead of random.
+  //
+  // Returns `Identifier`, not `this` — a protected constructor can't be
+  // expressed as a polymorphic `this`-returning factory in TS without the
+  // signature falling apart at subclass call sites. Subtypes that need their
+  // own id type (e.g. `UserIdentifier`) override both factories below
+  // directly instead.
   static generate(): Identifier {
     return new Identifier({ value: randomUUID() as string });
   }
@@ -19,5 +25,9 @@ export class Identifier extends ValueObject<{ value: string }> {
   // For rehydrating an entity from persistence, where the id already exists as a string.
   static fromString(value: string): Identifier {
     return new Identifier({ value });
+  }
+
+  toString(): string {
+    return this.props.value;
   }
 }
