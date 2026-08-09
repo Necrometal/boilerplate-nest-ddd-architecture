@@ -1,4 +1,4 @@
-import { DomainEvent } from './domain_event';
+import { DomainEvent } from './domain-event';
 import { Entity } from './entity';
 import { Identifier } from './identifier';
 
@@ -20,5 +20,15 @@ export abstract class AggregateRoot<
   // never external application/infra code.
   protected addDomainEvent(event: DomainEvent): void {
     this.#domainEvents.push(event);
+  }
+
+  // Public: the application layer calls this after persisting the aggregate,
+  // to fetch events for publishing (e.g. to an event bus). Returns a copy and
+  // clears the internal buffer in the same call, so the same event can never
+  // be pulled and published twice from one aggregate instance.
+  pullDomainEvents(): DomainEvent[] {
+    const events = [...this.#domainEvents];
+    this.#domainEvents = [];
+    return events;
   }
 }
