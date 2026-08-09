@@ -2,10 +2,22 @@ name: CI
 
 on:
   push:
-    branches: []
-  pull_request: [master, develop]
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
 
 jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: commitlint-github-action needs to see the whole
+          # commit range being pushed/PR'd, not just the latest commit.
+          fetch-depth: 0
+
+      - uses: wagoid/commitlint-github-action@v6
+
   build-and-test:
     runs-on: ubuntu-latest
     env:
