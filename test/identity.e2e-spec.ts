@@ -4,6 +4,18 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/shared/infrastructure/modules/app.module';
 
+interface RegisterResponseBody {
+  userId: string;
+}
+
+interface AuthenticateResponseBody {
+  token: string;
+}
+
+interface ErrorResponseBody {
+  message: string;
+}
+
 describe('Identity (e2e)', () => {
   let app: INestApplication<App>;
 
@@ -31,7 +43,8 @@ describe('Identity (e2e)', () => {
       .send({ email: 'user@example.com', password: 'abcd1234' })
       .expect(201)
       .expect((res) => {
-        expect(res.body.userId).toEqual(expect.any(String));
+        const body = res.body as RegisterResponseBody;
+        expect(body.userId).toEqual(expect.any(String));
       });
   });
 
@@ -53,7 +66,8 @@ describe('Identity (e2e)', () => {
       .send({ email: 'duplicate@example.com', password: 'abcd1234' })
       .expect(400)
       .expect((res) => {
-        expect(res.body.message).toBe('Email already registered');
+        const body = res.body as ErrorResponseBody;
+        expect(body.message).toBe('Email already registered');
       });
   });
 
@@ -68,8 +82,9 @@ describe('Identity (e2e)', () => {
       .send({ email: 'login@example.com', password: 'abcd1234' })
       .expect(200)
       .expect((res) => {
-        expect(res.body.token).toEqual(expect.any(String));
-        expect(res.body.token.split('.')).toHaveLength(3);
+        const body = res.body as AuthenticateResponseBody;
+        expect(body.token).toEqual(expect.any(String));
+        expect(body.token.split('.')).toHaveLength(3);
       });
   });
 
@@ -84,7 +99,8 @@ describe('Identity (e2e)', () => {
       .send({ email: 'wrongpass@example.com', password: 'wrongpass1' })
       .expect(400)
       .expect((res) => {
-        expect(res.body.message).toBe('Invalid credentials');
+        const body = res.body as ErrorResponseBody;
+        expect(body.message).toBe('Invalid credentials');
       });
   });
 });
