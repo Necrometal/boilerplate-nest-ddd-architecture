@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: commitlint-github-action needs to see the whole
+          # commit range being pushed/PR'd, not just the latest commit.
+          fetch-depth: 0
+
+      - uses: wagoid/commitlint-github-action@v6
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      # Dummy value: only test:e2e boots the app (via ConfigModule's
+      # validation), and nothing here talks to a real token consumer.
+      JWT_SECRET: ci-only-dummy-secret
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm test
+
+      - run: pnpm test:e2e
+
+      - run: pnpm build

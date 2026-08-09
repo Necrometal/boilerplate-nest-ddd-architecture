@@ -12,7 +12,10 @@ export abstract class Entity<TProperties extends { id: Identifier }> {
     this.props = props;
   }
 
-  getIdentifier(): Identifier {
+  // Returns `TProperties['id']`, not the base `Identifier` — so
+  // `User.getIdentifier()` gives back a `UserIdentifier`, not a plain
+  // `Identifier` that callers would have to cast to use.
+  getIdentifier(): TProperties['id'] {
     return this.props.id;
   }
 
