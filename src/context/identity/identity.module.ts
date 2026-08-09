@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { DomainEventPublisher } from 'src/shared/application/ports/domain-event-publisher';
+import { EventEmitter2DomainEventPublisher } from 'src/shared/infrastructure/events/event-emitter2-domain-event-publisher';
 import { PasswordHasher } from './application/ports/password-hasher';
 import { TokenIssuer } from './application/ports/token-issuer';
 import { AuthenticateUser } from './application/use-cases/authenticate-user';
@@ -31,6 +33,10 @@ import { IdentityController } from './interface/http/identity.controller';
     { provide: UserRepository, useClass: InMemoryUserRepository },
     { provide: PasswordHasher, useClass: BcryptPasswordHasher },
     { provide: TokenIssuer, useClass: JwtTokenIssuer },
+    {
+      provide: DomainEventPublisher,
+      useClass: EventEmitter2DomainEventPublisher,
+    },
   ],
 })
 export class IdentityModule {}

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { DomainEventPublisher } from 'src/shared/application/ports/domain-event-publisher';
 import { DomainError } from 'src/shared/domain/domain-error';
 import { UserRepository } from '../../domain/ports/user.repository';
 import { Email } from '../../domain/user/email.vo';
@@ -21,6 +22,7 @@ export class RegisterUser {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,
+    private readonly domainEventPublisher: DomainEventPublisher,
   ) {}
 
   async execute(input: RegisterUserInput): Promise<RegisterUserOutput> {
@@ -45,12 +47,15 @@ export class RegisterUser {
     // valid before `save` is ever called.
     const id = UserIdentifier.generate();
 
-    // Raises UserRegisteredEvent internally. Not published yet: that needs
-    // an EventPublisher port that doesn't exist — deliberately out of scope
-    // here rather than adding an unused abstraction.
+    // Raises UserRegisteredEvent internally; pulled and published below.
     const user = User.register(id, email, hashedPassword);
 
     await this.userRepository.save(user);
+
+    // Published only after save succeeds: a handler reacting to
+    // "user registered" (e.g. welcome email) must never fire for a user
+    // that didn't actually get persisted.
+    await this.domainEventPublisher.publish(user.pullDomainEvents());
 
     return { userId: id.toString() };
   }

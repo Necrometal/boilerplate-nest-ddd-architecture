@@ -67,7 +67,9 @@ describe('InMemoryUserRepository', () => {
 
     await repository.save(user);
     // Rebuilt from the same string, not the same instance.
-    const found = await repository.findById(UserIdentifier.fromString(id.toString()));
+    const found = await repository.findById(
+      UserIdentifier.fromString(id.toString()),
+    );
 
     expect(found).toBe(user);
   });

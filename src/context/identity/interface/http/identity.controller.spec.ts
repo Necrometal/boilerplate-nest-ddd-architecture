@@ -8,7 +8,9 @@ describe('IdentityController', () => {
   let controller: IdentityController;
 
   beforeEach(() => {
-    registerUser = { execute: jest.fn() } as unknown as jest.Mocked<RegisterUser>;
+    registerUser = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<RegisterUser>;
     authenticateUser = {
       execute: jest.fn(),
     } as unknown as jest.Mocked<AuthenticateUser>;

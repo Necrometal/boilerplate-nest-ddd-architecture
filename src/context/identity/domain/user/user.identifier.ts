@@ -8,7 +8,7 @@ import { v7 as randomUUID } from 'uuid';
 // (e.g. `User.register()`) would need a cast.
 export class UserIdentifier extends Identifier {
   static override generate(): UserIdentifier {
-    return new UserIdentifier({ value: randomUUID() as string });
+    return new UserIdentifier({ value: randomUUID() });
   }
 
   static override fromString(value: string): UserIdentifier {
