@@ -1,12 +1,16 @@
 import { Logger } from '@nestjs/common';
+import { UserRegisteredEvent } from 'src/context/identity/domain/events/user-registered.event';
 import { Email } from 'src/context/identity/domain/user/email.vo';
 import { UserIdentifier } from 'src/context/identity/domain/user/user.identifier';
-import { UserRegisteredEvent } from 'src/context/identity/domain/events/user-registered.event';
+import { RecordSentNotification } from '../use-cases/record-sent-notification';
 import { SendWelcomeEmailHandler } from './send-welcome-email.handler';
 
 describe('SendWelcomeEmailHandler', () => {
-  it('logs the recipient email when a user registers', () => {
-    const handler = new SendWelcomeEmailHandler();
+  it('logs the recipient email and records the notification when a user registers', async () => {
+    const recordSentNotification = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<RecordSentNotification>;
+    const handler = new SendWelcomeEmailHandler(recordSentNotification);
     const logSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
     const event = new UserRegisteredEvent(
       UserIdentifier.generate(),
@@ -14,11 +18,15 @@ describe('SendWelcomeEmailHandler', () => {
       Email.fromString('user@example.com'),
     );
 
-    handler.handle(event);
+    await handler.handle(event);
 
     expect(logSpy).toHaveBeenCalledWith(
       'Would send welcome email to user@example.com',
     );
+    expect(recordSentNotification.execute).toHaveBeenCalledWith({
+      recipientEmail: 'user@example.com',
+      message: 'Welcome email',
+    });
 
     logSpy.mockRestore();
   });
