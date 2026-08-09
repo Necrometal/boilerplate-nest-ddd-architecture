@@ -19,7 +19,7 @@ export class Identifier extends ValueObject<{ value: string }> {
   // own id type (e.g. `UserIdentifier`) override both factories below
   // directly instead.
   static generate(): Identifier {
-    return new Identifier({ value: randomUUID() as string });
+    return new Identifier({ value: randomUUID() });
   }
 
   // For rehydrating an entity from persistence, where the id already exists as a string.

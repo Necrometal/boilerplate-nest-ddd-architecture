@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { DomainEventPublisher } from 'src/shared/application/ports/domain-event-publisher';
+import { EnvironmentVariables } from 'src/shared/infrastructure/config/environment-variables';
 import { EventEmitter2DomainEventPublisher } from 'src/shared/infrastructure/events/event-emitter2-domain-event-publisher';
 import { PasswordHasher } from './application/ports/password-hasher';
 import { TokenIssuer } from './application/ports/token-issuer';
@@ -13,17 +15,21 @@ import { JwtTokenIssuer } from './infrastructure/security/jwt-token-issuer';
 import { IdentityController } from './interface/http/identity.controller';
 
 @Module({
-  // JWT_SECRET falls back to a dev-only literal so the app still boots
-  // without env setup; a missing/weak secret in production is a deploy
-  // config problem, not something to guard against here.
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET ?? 'dev-secret-change-me',
-      signOptions: {
-        expiresIn: process.env.EXPIRATION_TIMER
-          ? Number(process.env.EXPIRATION_TIMER)
-          : '1h',
-      },
+    // registerAsync + ConfigService instead of static `register`: JWT_SECRET
+    // is now required and validated at boot (see EnvironmentVariables), so
+    // no dev-secret fallback is needed here — the app never starts without it.
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (
+        configService: ConfigService<EnvironmentVariables, true>,
+      ) => ({
+        secret: configService.get('JWT_SECRET', { infer: true }),
+        signOptions: {
+          expiresIn:
+            configService.get('EXPIRATION_TIMER', { infer: true }) ?? '1h',
+        },
+      }),
     }),
   ],
   controllers: [IdentityController],
