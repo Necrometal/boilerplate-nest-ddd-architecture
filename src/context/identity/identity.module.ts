@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthenticateUser } from './application/use-cases/authenticate-user';
 import { PasswordHasher } from './application/ports/password-hasher';
-import { RegisterUser } from './application/use-cases/register-user';
 import { TokenIssuer } from './application/ports/token-issuer';
+import { AuthenticateUser } from './application/use-cases/authenticate-user';
+import { RegisterUser } from './application/use-cases/register-user';
 import { UserRepository } from './domain/ports/user.repository';
 import { InMemoryUserRepository } from './infrastructure/persistence/in-memory-user.repository';
 import { BcryptPasswordHasher } from './infrastructure/security/bcrypt-password-hasher';
@@ -17,7 +17,11 @@ import { IdentityController } from './interface/http/identity.controller';
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'dev-secret-change-me',
-      signOptions: { expiresIn: '1h' },
+      signOptions: {
+        expiresIn: process.env.EXPIRATION_TIMER
+          ? Number(process.env.EXPIRATION_TIMER)
+          : '1h',
+      },
     }),
   ],
   controllers: [IdentityController],
